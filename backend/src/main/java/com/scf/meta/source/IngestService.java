@@ -53,7 +53,16 @@ public class IngestService {
     }
 
     public record IngestCommand(String type, String sourceUri, String ecosystem, String buildId,
-                                String payload, Instant eventTime, Instant collectedAt, String actor) {}
+                                String payload, Instant eventTime, Instant collectedAt, String actor,
+                                String revisesId, String originId, String completeness,
+                                String completenessNote, Instant validFrom, Instant validTo) {
+        /** 兼容旧调用：不含来源时间账扩展字段。 */
+        public IngestCommand(String type, String sourceUri, String ecosystem, String buildId,
+                             String payload, Instant eventTime, Instant collectedAt, String actor) {
+            this(type, sourceUri, ecosystem, buildId, payload, eventTime, collectedAt, actor,
+                    null, null, null, null, null, null);
+        }
+    }
 
     @Transactional
     public SourceArtifact ingest(IngestCommand cmd) {
@@ -76,6 +85,12 @@ public class IngestService {
         artifact.eventTime = cmd.eventTime();
         artifact.collectedAt = cmd.collectedAt() != null ? cmd.collectedAt() : Instant.now();
         artifact.ingestStatus = SourceArtifact.IngestStatus.RECEIVED.name();
+        artifact.revisesId = cmd.revisesId();
+        artifact.originId = cmd.originId();
+        artifact.completeness = cmd.completeness();
+        artifact.completenessNote = cmd.completenessNote();
+        artifact.validFrom = cmd.validFrom();
+        artifact.validTo = cmd.validTo();
         sourceRepo.save(artifact);
 
         List<String> warnings = new ArrayList<>();
@@ -88,6 +103,13 @@ public class IngestService {
                 record.sourceArtifactId = artifact.id;
                 record.subjectHash = sig[0];
                 record.signer = sig[1];
+                if (sig.length > 6 && sig[6] != null) {
+                    try {
+                        record.validFrom = Instant.parse(sig[6]);
+                    } catch (Exception ignored) {
+                        // 非法生效时间格式时按自接收起有效
+                    }
+                }
                 signatureRepo.save(record);
             }
             for (String[] entry : result.catalogEntries) upsertCatalog(entry);

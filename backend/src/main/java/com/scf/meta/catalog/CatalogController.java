@@ -46,14 +46,16 @@ public class CatalogController {
         return ApiResponse.ok(entryRepo.findAll());
     }
 
-    public record ReviseRequest(String publisher, String aliases, String summary) {}
+    public record ReviseRequest(String publisher, String aliases, String summary, String effectiveFrom) {}
 
     @PostMapping("/entries/{id}/revise")
     public ApiResponse<CatalogRevision> revise(@PathVariable String id,
                                                @RequestBody ReviseRequest req,
                                                HttpServletRequest http) {
+        java.time.Instant effectiveFrom = (req.effectiveFrom() == null || req.effectiveFrom().isBlank())
+                ? null : java.time.Instant.parse(req.effectiveFrom());
         return ApiResponse.ok(catalogService.reviseEntry(id, req.publisher(), req.aliases(),
-                req.summary(), actor(http)));
+                req.summary(), effectiveFrom, actor(http)));
     }
 
     @GetMapping("/entries/{id}/revisions")

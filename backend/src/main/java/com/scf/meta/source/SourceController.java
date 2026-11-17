@@ -36,7 +36,9 @@ public class SourceController {
 
     public record IngestRequest(@NotBlank String type, String sourceUri, String ecosystem,
                                 String buildId, @NotBlank String payload,
-                                String eventTime, String collectedAt) {}
+                                String eventTime, String collectedAt,
+                                String revisesId, String originId, String completeness,
+                                String completenessNote, String validFrom, String validTo) {}
 
     @PostMapping
     public ApiResponse<SourceArtifact> ingest(@RequestBody IngestRequest req,
@@ -44,7 +46,9 @@ public class SourceController {
         String actor = (String) http.getAttribute(AuthInterceptor.ATTR_USER);
         SourceArtifact artifact = ingestService.ingest(new IngestService.IngestCommand(
                 req.type(), req.sourceUri(), req.ecosystem(), req.buildId(), req.payload(),
-                parseInstant(req.eventTime()), parseInstant(req.collectedAt()), actor));
+                parseInstant(req.eventTime()), parseInstant(req.collectedAt()), actor,
+                req.revisesId(), req.originId(), req.completeness(), req.completenessNote(),
+                parseInstant(req.validFrom()), parseInstant(req.validTo())));
         return ApiResponse.ok(artifact);
     }
 

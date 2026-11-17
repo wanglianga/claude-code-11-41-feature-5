@@ -9,6 +9,7 @@
         <el-menu-item index="/identities">身份工作区</el-menu-item>
         <el-menu-item index="/dependencies">依赖事实编译</el-menu-item>
         <el-menu-item index="/build-facts">构建事实签发</el-menu-item>
+        <el-menu-item index="/replay">时点复演与解释</el-menu-item>
         <el-menu-item index="/catalog">消费目录</el-menu-item>
         <el-menu-item index="/monitor">变动监测</el-menu-item>
         <el-menu-item index="/scenarios">验收场景</el-menu-item>

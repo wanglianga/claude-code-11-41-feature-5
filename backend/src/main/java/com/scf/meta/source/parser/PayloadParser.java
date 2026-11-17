@@ -19,7 +19,7 @@ public class PayloadParser {
     public static class ParseResult {
         public final List<ComponentClaim> claims = new ArrayList<>();
         public final List<String> warnings = new ArrayList<>();
-        /** 签名索引解析出的签名记录载荷：[subjectHash, signer, name, version, ecosystem, publisher] */
+        /** 签名索引解析出的签名记录载荷：[subjectHash, signer, name, version, ecosystem, publisher, validFrom] */
         public final List<String[]> signatures = new ArrayList<>();
         /** 组件目录载荷：[ecosystem, namespace, name, publisher, aliasesJson] */
         public final List<String[]> catalogEntries = new ArrayList<>();
@@ -68,6 +68,20 @@ public class PayloadParser {
         return c;
     }
 
+    /** 逐条提取依赖范围与业务有效区间（缺省继承来源区间，由复演引擎处理）。 */
+    private static void applyMeta(ComponentClaim c, JsonNode node) {
+        String scope = text(node, "scope");
+        if (scope != null) c.scope = scope;
+        String validFrom = text(node, "validFrom");
+        String validTo = text(node, "validTo");
+        try {
+            if (validFrom != null) c.validFrom = java.time.Instant.parse(validFrom);
+            if (validTo != null) c.validTo = java.time.Instant.parse(validTo);
+        } catch (Exception ignored) {
+            // 非法时间格式时保留来源级区间
+        }
+    }
+
     private static String text(JsonNode node, String... fields) {
         for (String f : fields) {
             JsonNode v = node.get(f);
@@ -101,6 +115,7 @@ public class PayloadParser {
             }
             String integrity = text(comp, "integrity");
             if (c.hashValue == null && integrity != null) applyIntegrity(c, integrity);
+            applyMeta(c, comp);
             if (c.name != null) result.claims.add(c);
         }
     }
@@ -128,6 +143,7 @@ public class PayloadParser {
                 c.hashAlg = sha.length() == 128 ? "SHA-512" : sha.length() == 40 ? "SHA-1" : "SHA-256";
                 c.hashValue = sha;
             }
+            applyMeta(c, dep);
             if (c.name != null) result.claims.add(c);
         }
     }
@@ -152,6 +168,7 @@ public class PayloadParser {
                 c.hashAlg = "SHA-256";
                 c.hashValue = hash;
             }
+            applyMeta(c, r);
             if (c.name != null) result.claims.add(c);
         }
     }
@@ -237,6 +254,7 @@ public class PayloadParser {
                 result.warnings.add("私有镜像来源字段需单独维护："
                         + (c.name == null ? "?" : c.name) + " 的镜像字段已按变体映射，生态上下文待核");
             }
+            applyMeta(c, pkg);
             if (c.name != null) result.claims.add(c);
         }
     }
@@ -277,6 +295,7 @@ public class PayloadParser {
             String eco = text(d, "ecosystem", "language");
             if (eco != null) c.ecosystem = eco;
             c.publisher = text(d, "publisher");
+            applyMeta(c, d);
             if (c.name != null) result.claims.add(c);
         }
     }
@@ -299,7 +318,8 @@ public class PayloadParser {
                 publisher = text(comp, "publisher");
             }
             if (subjectHash != null) {
-                result.signatures.add(new String[]{subjectHash, signer, name, version, eco, publisher});
+                String validFrom = text(s, "validFrom");
+                result.signatures.add(new String[]{subjectHash, signer, name, version, eco, publisher, validFrom});
                 if (name != null) {
                     ComponentClaim c = newClaim(artifact, ComponentClaim.Kind.SIGNATURE);
                     c.name = name;
@@ -308,6 +328,7 @@ public class PayloadParser {
                     c.publisher = publisher;
                     c.hashAlg = "SHA-256";
                     c.hashValue = subjectHash;
+                    applyMeta(c, s);
                     result.claims.add(c);
                 }
             }

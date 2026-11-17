@@ -14,6 +14,7 @@ const router = createRouter({
         { path: 'identities', component: () => import('../views/IdentitiesView.vue'), meta: { title: '身份工作区' } },
         { path: 'dependencies', component: () => import('../views/DependenciesView.vue'), meta: { title: '依赖事实编译' } },
         { path: 'build-facts', component: () => import('../views/BuildFactsView.vue'), meta: { title: '构建事实' } },
+        { path: 'replay', component: () => import('../views/ReplayView.vue'), meta: { title: '时点复演与解释' } },
         { path: 'catalog', component: () => import('../views/CatalogView.vue'), meta: { title: '消费目录' } },
         { path: 'monitor', component: () => import('../views/MonitorView.vue'), meta: { title: '变动监测' } },
         { path: 'scenarios', component: () => import('../views/ScenariosView.vue'), meta: { title: '验收场景' } }

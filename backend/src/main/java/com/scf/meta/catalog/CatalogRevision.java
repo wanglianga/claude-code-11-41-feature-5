@@ -34,6 +34,9 @@ public class CatalogRevision {
     @Column(nullable = false)
     public Instant createdAt;
 
+    /** 修订的业务生效时间（追溯修订可早于登记时间；空表示自登记时起生效） */
+    public Instant effectiveFrom;
+
     @PrePersist
     void prePersist() {
         if (id == null) id = UUID.randomUUID().toString();

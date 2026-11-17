@@ -27,9 +27,10 @@
         <el-table-column label="后续差异来源" width="110" align="center">
           <template #default="{ row }">{{ lateCount(row) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="90">
+        <el-table-column label="操作" width="150">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="openTrace(row)">追溯</el-button>
+            <el-button link type="primary" size="small" @click="openExplain(row)">解释</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -143,12 +144,14 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { get, post } from '../api/client'
 import { useAuthStore } from '../stores/auth'
 import StatusTag from '../components/StatusTag.vue'
 
 const auth = useAuthStore()
+const router = useRouter()
 const facts = ref<any[]>([])
 const builds = ref<string[]>([])
 const issueDialog = ref(false)
@@ -204,6 +207,11 @@ async function issue() {
 async function openTrace(row: any) {
   trace.value = await get(`/build-facts/${row.id}/trace`)
   traceDrawer.value = true
+}
+
+/** 从历史结果的一行进入时点复演与解释。 */
+function openExplain(row: any) {
+  router.push({ path: '/replay', query: { buildId: row.buildId, cutoff: row.cutoffTime } })
 }
 
 onMounted(load)

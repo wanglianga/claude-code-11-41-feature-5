@@ -65,6 +65,27 @@ public class SourceArtifact {
     @Column(columnDefinition = "text")
     public String note;
 
+    /** 修订链：本来源更正/替代的另一来源 id（同一来源的更正版） */
+    public String revisesId;
+
+    /** 原始记录标识：同一原始记录被复制/转抄到多个文件时共享该标识，去重后只算一份独立支持 */
+    @Column(length = 128)
+    public String originId;
+
+    /** 清单完整范围：COMPLETE（完整清单）/ PARTIAL（残缺清单）/ UNKNOWN（未知） */
+    @Column(length = 16)
+    public String completeness;
+
+    /** 清单覆盖范围说明（如“覆盖 runtime 全部直接依赖”） */
+    @Column(length = 512)
+    public String completenessNote;
+
+    /** 声明关系的业务有效起点（空表示不限） */
+    public Instant validFrom;
+
+    /** 声明关系的业务有效终点（空表示不限） */
+    public Instant validTo;
+
     @Column(nullable = false)
     public Instant createdAt;
 

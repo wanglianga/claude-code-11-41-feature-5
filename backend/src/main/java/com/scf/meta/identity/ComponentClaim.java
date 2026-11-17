@@ -56,6 +56,16 @@ public class ComponentClaim {
     /** 归并到的身份 */
     public String identityId;
 
+    /** 依赖范围（runtime/test 等，缺省按 runtime 处理） */
+    @Column(length = 32)
+    public String scope;
+
+    /** 关系的业务有效起点（缺省继承来源的有效区间） */
+    public Instant validFrom;
+
+    /** 关系的业务有效终点（缺省继承来源的有效区间） */
+    public Instant validTo;
+
     @Column(nullable = false)
     public Instant createdAt;
 

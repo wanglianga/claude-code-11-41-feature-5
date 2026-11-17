@@ -33,7 +33,17 @@ public class ScenarioController {
                 Map.of("name", "catalog-alias-revision", "title", "目录别名修订",
                         "description", "目录修订改变别名/发布者归属，监测器暂停下游视图，历史保留当时身份版本"),
                 Map.of("name", "signature-revocation", "title", "签名撤销",
-                        "description", "唯一依据的签名撤销后组件降为证据不足，新事实不能继续显示已证实")));
+                        "description", "唯一依据的签名撤销后组件降为证据不足，新事实不能继续显示已证实"),
+                Map.of("name", "replay-late-source", "title", "复演·晚到资料",
+                        "description", "同一业务时点两个资料截止时间结论不同，变化归因到补传锁文件，原结果保持可回查"),
+                Map.of("name", "replay-revision", "title", "复演·追溯修订",
+                        "description", "更正版按生效与接收条件确定适用范围；后来确认的别名不用于解释此前的清单"),
+                Map.of("name", "replay-validity-copies", "title", "复演·区间错开与转抄",
+                        "description", "依赖边与身份有效区间无交集不能拼出链路；同一原始记录的转抄只算一份独立支持"),
+                Map.of("name", "replay-exclusive-absence", "title", "复演·互斥与缺席",
+                        "description", "互斥身份不合并证明；完整/残缺清单区分缺席与未知，排除结论保留判断条件"),
+                Map.of("name", "replay-minimal-evidence", "title", "复演·精简组合",
+                        "description", "多组替代支持下精简组合不可再删减；预算提前停止时如实报告覆盖范围")));
     }
 
     @PostMapping("/{name}/run")

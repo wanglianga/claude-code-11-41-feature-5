@@ -32,6 +32,9 @@ public class SignatureRecord {
 
     public Instant revokedAt;
 
+    /** 签名的业务有效起点（空表示自接收起有效） */
+    public Instant validFrom;
+
     @Column(nullable = false)
     public Instant createdAt;
 

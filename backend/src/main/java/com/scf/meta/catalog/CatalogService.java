@@ -65,10 +65,16 @@ public class CatalogService {
         return e;
     }
 
-    /** 目录修订：改变别名或发布者归属，触发变动监测。 */
+    /** 目录修订：改变别名或发布者归属，触发变动监测。effectiveFrom 为业务生效时间（可追溯）。 */
     @Transactional
     public CatalogRevision reviseEntry(String entryId, String newPublisher, String newAliases,
                                        String summary, String actor) {
+        return reviseEntry(entryId, newPublisher, newAliases, summary, null, actor);
+    }
+
+    @Transactional
+    public CatalogRevision reviseEntry(String entryId, String newPublisher, String newAliases,
+                                       String summary, java.time.Instant effectiveFrom, String actor) {
         CatalogEntry entry = entryRepo.findById(entryId)
                 .orElseThrow(() -> new IllegalArgumentException("目录条目不存在: " + entryId));
         Map<String, Object> oldValue = new LinkedHashMap<>();
@@ -93,6 +99,7 @@ public class CatalogService {
         revision.changeSummary = summary;
         revision.oldValue = json.write(oldValue);
         revision.newValue = json.write(newValue);
+        revision.effectiveFrom = effectiveFrom;
         revisionRepo.save(revision);
 
         // 变动监测：定位当前引用该坐标的身份与下游视图并暂停
